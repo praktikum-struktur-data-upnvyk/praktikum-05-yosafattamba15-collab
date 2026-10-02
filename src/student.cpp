@@ -43,25 +43,32 @@ using namespace std;
 // bentuknya baik-baik: `pop` yang Anda kerjakan punya kerangka yang sama
 // persis, hanya saja ia juga memindahkan `s.top` dan membuang node-nya.
 
-void inisialisasi(Stack& s) {
+void inisialisasi(Stack &s)
+{
     s.top = nullptr;
 }
 
-bool isEmpty(const Stack& s) {
+bool isEmpty(const Stack &s)
+{
     return s.top == nullptr;
 }
 
-bool peek(Stack& s, int& nilai) {
-    if (s.top == nullptr) return false;
+bool peek(Stack &s, int &nilai)
+{
+    if (s.top == nullptr)
+        return false;
 
     nilai = s.top->data;
     return true;
 }
 
-string display(Stack& s) {
+string display(Stack &s)
+{
     string hasil;
-    for (Node* p = s.top; p != nullptr; p = p->next) {
-        if (!hasil.empty()) hasil += " ";
+    for (Node *p = s.top; p != nullptr; p = p->next)
+    {
+        if (!hasil.empty())
+            hasil += " ";
         hasil += to_string(p->data);
     }
     return hasil;
@@ -70,22 +77,86 @@ string display(Stack& s) {
 // =============================================================================
 
 // SOAL 1
-bool push(Stack& s, int nilai) {
-    return false;
+bool push(Stack &s, int nilai)
+{
+    Node *newNode = new Node;
+
+    if (newNode == nullptr)
+        return false;
+
+    newNode->data = nilai;
+    newNode->next = s.top;
+    s.top = newNode;
+
+    return true;
 }
 
 // SOAL 2
-bool pop(Stack& s, int& nilai) {
-    return false;
+bool pop(Stack &s, int &nilai)
+{
+    if (s.top == nullptr)
+        return false;
+
+    Node *temp = s.top;
+    nilai = temp->data;
+    s.top = s.top->next;
+
+    delete temp;
+
+    return true;
 }
 
 // SOAL 3
-void clear(Stack& s) {
+void clear(Stack &s)
+{
+    while (s.top != nullptr)
+    {
+        Node *temp = s.top;
+
+        s.top = s.top->next;
+
+        delete temp;
+    }
 }
 
 // SOAL 4
-bool kurungSeimbang(const string& ekspresi) {
-    return false;
+bool kurungSeimbang(const string &ekspresi)
+{
+    Stack s;
+    inisialisasi(s);
+
+    for (char c : ekspresi)
+    {
+        if (c == '(' || c == '[' || c == '{')
+        {
+            push(s, c);
+        }
+        else if (c == ')' || c == ']' || c == '}')
+        {
+            int atas = 0;
+
+            if (!pop(s, atas))
+            {
+                clear(s);
+                return false;
+            }
+
+            char buka = static_cast<char>(atas);
+            bool cocok = (c == ')' && buka == '(') ||
+                         (c == ']' && buka == '[') ||
+                         (c == '}' && buka == '{');
+
+            if (!cocok)
+            {
+                clear(s);
+                return false;
+            }
+        }
+    }
+
+    bool seimbang = isEmpty(s);
+    clear(s);
+    return seimbang;
 }
 
 // =============================================================================
@@ -114,40 +185,51 @@ bool kurungSeimbang(const string& ekspresi) {
 
 #ifndef ADA_MAIN_LAIN
 
-static const char* benarSalah(bool nilai) {
+static const char *benarSalah(bool nilai)
+{
     return nilai ? "true" : "false";
 }
 
-static ostream& baris(const string& label) {
+static ostream &baris(const string &label)
+{
     return cout << "    " << left << setw(20) << label << ": ";
 }
 
 // Keadaan ringkas tumpukan, dibaca lewat fungsi yang sudah disediakan.
-static void keadaan(Stack& s) {
+static void keadaan(Stack &s)
+{
     baris("display") << "\"" << display(s) << "\"\n";
 
     int atas = 0;
-    if (peek(s, atas)) baris("puncak") << atas << "\n";
-    else               baris("puncak") << "(tidak ada)\n";
+    if (peek(s, atas))
+        baris("puncak") << atas << "\n";
+    else
+        baris("puncak") << "(tidak ada)\n";
 
     baris("isEmpty") << benarSalah(isEmpty(s)) << "\n";
 }
 
 // Satu percobaan Ctrl+Z, lengkap dengan nilai yang diterima.
-static void cobaUndo(Stack& s) {
+static void cobaUndo(Stack &s)
+{
     int nilai = -999;
     bool berhasil = pop(s, nilai);
     baris("Ctrl+Z");
-    if (berhasil) cout << "berhasil, yang dibatalkan = " << nilai << "\n";
-    else          cout << "gagal (riwayat kosong), nilai tidak diubah ("
-                       << nilai << ")\n";
+    if (berhasil)
+        cout << "berhasil, yang dibatalkan = " << nilai << "\n";
+    else
+        cout << "gagal (riwayat kosong), nilai tidak diubah ("
+             << nilai << ")\n";
 }
 
-static void langkah(const string& teks) {
-    cout << "\n" << teks << "\n";
+static void langkah(const string &teks)
+{
+    cout << "\n"
+         << teks << "\n";
 }
 
-int main() {
+int main()
+{
     cout << "==================================================\n";
     cout << " Study Case — Aplikasi Editor \"Tulis\"\n";
     cout << " Memeragakan satu sesi mengetik\n";
@@ -169,8 +251,10 @@ int main() {
 
     langkah("[2] SOAL 1 — tidak ada batas kapasitas: 10 perubahan sekaligus");
     bool semuaMasuk = true;
-    for (int i = 1; i <= 10; ++i) {
-        if (!push(s, i * 100)) semuaMasuk = false;
+    for (int i = 1; i <= 10; ++i)
+    {
+        if (!push(s, i * 100))
+            semuaMasuk = false;
     }
     baris("semua masuk") << benarSalah(semuaMasuk) << "\n";
     keadaan(s);
@@ -198,16 +282,18 @@ int main() {
 
     langkah("[7] SOAL 4 — kurungSeimbang: pemeriksa kurung pada kode");
     const string contoh[] = {
-        "( a + b ) * ( c - d )",   // seimbang
-        "{[()]}",                  // seimbang, tiga jenis bersarang
-        "",                        // seimbang, tidak ada kurung
-        "( a + b ) * ( c - d",     // kurang tutup
-        "( a + [ b ) ]",           // bersilangan
-        ")("                       // tutup muncul lebih dulu
+        "( a + b ) * ( c - d )", // seimbang
+        "{[()]}",                // seimbang, tiga jenis bersarang
+        "",                      // seimbang, tidak ada kurung
+        "( a + b ) * ( c - d",   // kurang tutup
+        "( a + [ b ) ]",         // bersilangan
+        ")("                     // tutup muncul lebih dulu
     };
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 6; ++i)
+    {
         cout << "    \"" << contoh[i] << "\"";
-        for (size_t j = contoh[i].size(); j < 24; ++j) cout << " ";
+        for (size_t j = contoh[i].size(); j < 24; ++j)
+            cout << " ";
         cout << " -> " << benarSalah(kurungSeimbang(contoh[i])) << "\n";
     }
     cout << "\n    Yang benar: true, true, true, false, false, false\n";
